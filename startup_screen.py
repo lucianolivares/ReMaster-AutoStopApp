@@ -1,11 +1,7 @@
-from kivymd.uix.screen import MDScreen
-from kivymd.app import MDApp
-from kivy.lang import Builder
-from myfirebase import MyFirebase
 from kivy.clock import Clock
-
-from navigation_screen import NavigationScreen
-from signin_screen import SigninScreen
+from kivy.lang import Builder
+from kivymd.app import MDApp
+from kivymd.uix.screen import MDScreen
 
 
 kv = """
@@ -23,10 +19,15 @@ class StartupScreen(MDScreen):
     Builder.load_string(kv)
     def __init__(self, **kw):
         super().__init__(**kw)
+        from myfirebase import MyFirebase
+
         self.app = MDApp.get_running_app()
         self.my_firebase = MyFirebase()
     
     def on_enter(self):
+        from navigation_screen import NavigationScreen
+        from signin_screen import SigninScreen
+
         nav_screen = NavigationScreen()
         signin_screen = SigninScreen()
         self.app.root.add_widget(nav_screen)
@@ -45,5 +46,3 @@ class StartupScreen(MDScreen):
 
     def load_signin(self):
         self.app.root.current = "signin_screen"
-
-

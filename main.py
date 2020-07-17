@@ -1,12 +1,15 @@
-from kivymd.app import MDApp
 from kivy.core.window import Window
 from kivy.uix.screenmanager import ScreenManager
-
-from startup_screen import StartupScreen
+from kivymd.app import MDApp
 
 
 class AutoStop(MDApp):
     def build(self):
+        """[summary]
+        Constructor inicial de la aplicación
+        Returns:
+            [screenmanager]: [screenmanager principal de la aplicación]
+        """
         Window.size = (480, 720)
         sm = ScreenManager()
         self.title = "AutoStop"
@@ -17,6 +20,7 @@ class AutoStop(MDApp):
         return sm
 
     def on_start(self):
+        from startup_screen import StartupScreen
         ss = StartupScreen()
         self.root.add_widget(ss)
         self.root.current = "startup_screen"

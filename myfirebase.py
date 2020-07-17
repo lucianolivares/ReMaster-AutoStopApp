@@ -2,7 +2,7 @@ import requests
 import json
 
 class MyFirebase():
-    wak = ""
+    wak = "AIzaSyCFFc72Woo5lILW1WfGH_Sve6G3ajLgt0w"
 
     def sign_in(self, email, password):
         signin_url = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=" + self.wak
