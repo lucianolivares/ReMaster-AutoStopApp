@@ -5,7 +5,7 @@ from functools import partial
 
 from classes import ListIcon
 
-kv = """
+Builder.load_string('''
 <NavigationScreen>
     name: "navigation_screen"
     NavigationLayout:
@@ -35,16 +35,16 @@ kv = """
 
                 Image:
                     size_hint_y: .3
-                    source: "resources/icons/logo2.jpeg"
+                    source: "resources/logo2.jpeg"
 
                 ScrollView:
                     MDList:
                         id: nav_list
 
-"""
+''')
+
 
 class NavigationScreen(MDScreen):
-    Builder.load_string(kv)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
