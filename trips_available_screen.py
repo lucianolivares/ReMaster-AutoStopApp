@@ -6,7 +6,7 @@ from kivymd.uix.dialog import MDDialog
 from kivymd.uix.picker import MDTimePicker
 from kivymd.uix.screen import MDScreen
 
-kv = '''
+Builder.load_string('''
 <AddTripDialog>
     orientation: "vertical"
     spacing: "8dp"
@@ -45,6 +45,7 @@ kv = '''
             text: "Viajes Disponibles"
             font_style: "H2"
 '''
+)
 
 
 class AddTripDialog(MDBoxLayout):
@@ -54,7 +55,6 @@ class AddTripDialog(MDBoxLayout):
 
 
 class TripsAvailableScreen(MDScreen):
-    Builder.load_string(kv)
 
     def __init__(self, **kw):
         super().__init__(**kw)
