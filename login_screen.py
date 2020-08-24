@@ -72,9 +72,21 @@ class LoginScreen(MDScreen):
         When entering the screen it initializes the functions
         to their respective buttons within it
         """
-        #self.ids.signup_button.bind(on_release=self.load_signup_screen)
+        self.ids.signup_button.bind(on_release=self.load_signup_screen)
         self.ids.login_button.bind(on_release=self.login)
 
+    def load_signup_screen(self, instance):
+        """[summary]
+        If the signup_screen has not been created, it is created and
+        redirected to it by pressing the button Create a new account
+        """
+        if not APP.root.has_screen("signup_screen"):
+            from signup_screen import SignupScreen
+            self.signup_screen = SignupScreen()
+            APP.root.add_widget(self.signup_screen)
+
+        APP.root.current = "signup_screen"
+        
     def login(self, instance):
         """[summary]
         Function in charge of collecting the information entered by the user and checking

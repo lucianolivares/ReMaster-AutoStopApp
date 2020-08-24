@@ -39,4 +39,48 @@ class Login():
         refresh_req = requests.post(refresh_url, data=refresh_payload)
         id_token = refresh_req.json()['id_token']
 
+
+class Signup():
+    @staticmethod
+    def signup_passenger(localId, name, last_name, cel_number):
+        new_user_data = {
+            'name': name,
+            'last_name': last_name,
+            'cel_number': cel_number,
+            'driver': {}
+        }
+        post_request = requests.patch(
+            f'https://remasterautostop-fc4ec.firebaseio.com/users/{localId}.json',
+            data=json.dumps(new_user_data)
+        )
+
+    @staticmethod
+    def signup_driver(localId, rut, plate):
+        driver_data = {
+            'rut': rut,
+            'plate': plate
+        }
+        post_request = requests.patch(
+            f'https://remasterautostop-fc4ec.firebaseio.com/users/{localId}/driver.json',
+            data=json.dumps(driver_data)
+        )
+
+    def signup(self, email, password, name, last_name, cel_number, rut=None, plate=None, driver=False):
+        signup_url = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=" + WAK
+        signup_payload = {
+            "email": email,
+            "password": password}
+        signup_request = requests.post(signup_url, data=signup_payload)
+
+        signup_data = json.loads(signup_request.content.decode())
+
+        if signup_request.ok:
+            self.signup_passenger(signup_data["localId"], name, last_name, cel_number)
+            if driver:
+                self.signup_driver(signup_data["localId"], rut, plate)
+            Login().login(email, password)
+
+        else:
+            print(signup_data["error"]["message"])
+
 #MyFirebase().sign_in("luciano@correo.com", "12341234")
