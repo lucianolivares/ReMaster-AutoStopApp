@@ -13,7 +13,7 @@ Builder.load_string("""
     md_bg_color: app.theme_cls.primary_color
 
     Image:
-        source: "resources/icons/icono.png"
+        source: "resources/icono.png"
         size_hint: (.2, .2)
         pos_hint: {'center_x': .5, 'center_y':.5}
         
@@ -35,9 +35,9 @@ class StartupScreen(MDScreen):
             # Try to read the persisten signing credentials (refresh token)
             # Use refresh token to get a new idToken
             self.login.exchange_refresh_token()
-            Clock.schedule_once(lambda dt: self.load_navigation_screen(), 1)
+            Clock.schedule_once(lambda dt: self.load_navigation_screen(), 2)
         except:
-            Clock.schedule_once(lambda dt: self.load_login_screen(), 1)
+            Clock.schedule_once(lambda dt: self.load_login_screen(), 2)
 
     def load_navigation_screen(self):
         nav_screen = NavigationScreen()

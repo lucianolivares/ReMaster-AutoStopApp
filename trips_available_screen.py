@@ -6,6 +6,8 @@ from kivymd.uix.dialog import MDDialog
 from kivymd.uix.picker import MDTimePicker, MDDatePicker
 from kivymd.uix.screen import MDScreen
 
+from myfirebase import Database
+
 Builder.load_string('''
 <AddTripDialog>
     orientation: "vertical"
@@ -18,6 +20,7 @@ Builder.load_string('''
     MDTextField:
         id: city_from
         hint_text: "Desde"
+        on_text_validate: city_to.focus = True
 
     MDTextField:
         id: city_to
@@ -72,6 +75,7 @@ Builder.load_string('''
 
 
 APP = MDApp.get_running_app()
+DATABASE = Database()
 
 class AddTripDialog(MDBoxLayout):
     def __init__(self, **kw):
@@ -147,6 +151,12 @@ class TripsAvailableScreen(MDScreen):
         if (self.city_from and self.city_to and self.seats_available != "" and
             self.date != "Fecha" and self.hour != "Hora"):
             # If All fields are completed the add the Trip
+            DATABASE.create_new_trip(
+                APP.data['name'], APP.data['last_name'],
+                self.city_from, self.city_to, self.date, self.hour,
+                self.seats_available, APP.data['cel_number'], APP.data['driver']['plate']
+            )
+
             self.close_dialog("")
 
         else:

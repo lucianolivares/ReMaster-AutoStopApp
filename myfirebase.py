@@ -1,5 +1,7 @@
 import requests
 import json
+import uuid
+
 
 from kivymd.app import MDApp
 
@@ -18,6 +20,10 @@ class Login():
             refresh_token = login_data["refreshToken"]
             with open("resources/refresh_token.txt", "w") as f:
                 f.write(refresh_token)
+            
+            # Refresh self.data
+            user_data = requests.get(f'https://remasterautostop-fc4ec.firebaseio.com/users/{login_data["localId"]}.json')
+            APP.data = json.loads(user_data.content.decode())
             # Change to NavigationScreen and remove login_screen
             login_screen = APP.root.current_screen
             from navigation_screen import NavigationScreen
@@ -38,7 +44,10 @@ class Login():
         refresh_payload = '{"grant_type": "refresh_token", "refresh_token": "%s"}' % refresh_token
         refresh_req = requests.post(refresh_url, data=refresh_payload)
         id_token = refresh_req.json()['id_token']
-
+        APP.local_id = refresh_req.json()['user_id']
+        user_data = requests.get(f'https://remasterautostop-fc4ec.firebaseio.com/users/{APP.local_id}.json')
+        APP.data = json.loads(user_data.content.decode())
+        return True
 
 class Signup():
     @staticmethod
@@ -82,5 +91,27 @@ class Signup():
 
         else:
             print(signup_data["error"]["message"])
+
+class Database():
+
+    @staticmethod
+    def create_new_trip(name, last_name, city_from, city_to, date, hour, seats_available, cel_number, plate):
+        n_trip = uuid.uuid1()
+        trip_data = {
+            "driver": f'{name} {last_name}',
+            "city_from": city_from,
+            "city_to": city_to,
+            "date": date,
+            "hour": hour,
+            "seats_available": seats_available,
+            "cel_number": cel_number,
+            "plate": plate
+        }
+
+        patch_request = requests.patch(
+            f'https://remasterautostop-fc4ec.firebaseio.com/trips_available/{n_trip}.json',
+            data=json.dumps(trip_data)
+        )
+
 
 #MyFirebase().sign_in("luciano@correo.com", "12341234")
