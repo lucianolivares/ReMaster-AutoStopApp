@@ -5,7 +5,9 @@ from kivymd.uix.button import MDFlatButton
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.picker import MDTimePicker, MDDatePicker
 from kivymd.uix.screen import MDScreen
+from kivy.clock import Clock
 
+from trips_banner import TripsBanner
 from myfirebase import Database
 
 Builder.load_string('''
@@ -60,11 +62,21 @@ Builder.load_string('''
 
 <TripsAvailableScreen>:
     add_trip_button: add_trip_button
-    MDFloatLayout:
-        MDLabel:
-            text: "Viajes Disponibles"
-            font_style: "H2"
     
+    MDScrollViewRefreshLayout:
+        id: refresh_layout
+        refresh_callback: root.refresh_callback
+        root_layout: root
+
+        MDGridLayout:
+            id: trips_grid
+            cols: 1
+            padding: 10, 10
+            spacing: 10, 10
+            adaptive_height: True
+            row_default_height: 650
+
+
     MDFloatingActionButton:
         id: add_trip_button
         icon: "plus"
@@ -99,7 +111,16 @@ class TripsAvailableScreen(MDScreen):
 
     def on_pre_enter(self, *args):
         self.add_trip_button.bind(on_release=self.show_add_trip_dialog)
-    
+
+        ##Test
+        self.ids.trips_grid.add_widget(TripsBanner())
+
+    def refresh_callback(self, *args):
+        def refresh_callback(interval):
+            self.ids.refresh_layout.refresh_done()
+
+        Clock.schedule_once(refresh_callback, 1)
+
     def show_add_trip_dialog(self, instance_button):
         if not self.add_trip_dialog:
             self.add_trip_dialog = MDDialog(

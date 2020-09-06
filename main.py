@@ -1,5 +1,5 @@
 from kivy.core.window import Window
-from kivy.uix.screenmanager import ScreenManager
+from kivy.uix.screenmanager import ScreenManager, NoTransition
 from kivymd.app import MDApp
 
 
@@ -11,7 +11,7 @@ class AutoStop(MDApp):
             [screenmanager]: [screenmanager principal de la aplicación]
         """
         #Window.size = (480, 720)
-        sm = ScreenManager()
+        sm = ScreenManager(transition=NoTransition())
         self.title = "AutoStop"
         self.theme_cls.primary_palette = "LightBlue"
         self.theme_cls.primary_hue = "700"
