@@ -6,13 +6,14 @@ from kivymd.uix.dialog import MDDialog
 from kivymd.uix.picker import MDDatePicker, MDTimePicker
 from kivymd.uix.screen import MDScreen
 
+from myfirebase import Database
+
 Builder.load_string('''
 <AddRequestDialog>
     orientation: "vertical"
     spacing: "8dp"
     size_hint_y: None
     height: "300dp"
-    
 
     MDTextField:
         id: city_from
@@ -51,7 +52,7 @@ Builder.load_string('''
             icon: "clock"
         
     MDTextField:
-        id: n_passenger
+        id: n_passengers
         hint_text: "Número de pasajeros"
 
 <PassengersAvailableScreen>:
@@ -72,6 +73,7 @@ Builder.load_string('''
 )
 
 APP = MDApp.get_running_app()
+DATABASE = Database()
 
 class AddRequestDialog(MDBoxLayout):
     def __init__(self, **kw):
@@ -151,7 +153,11 @@ class PassengersAvailableScreen(MDScreen):
         if (self.city_from and self.city_to and self.n_passengers != "" and
             self.date != "Fecha" and self.hour != "Hora"):
             # If All fields are completed the add the request
-            
+            DATABASE.add_passenger_request(
+                APP.data['name'], APP.data['last_name'],
+                self.city_from, self.city_to, self.date, self.hour,
+                self.n_passengers, APP.data['cel_number']
+            )
             self.close_dialog("")
         else:
             print("Debes Completar Todos Los Datos")

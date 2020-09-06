@@ -113,5 +113,23 @@ class Database():
             data=json.dumps(trip_data)
         )
 
+    @staticmethod
+    def add_passenger_request(name, last_name, city_from, city_to, date, hour, n_passengers, cel_number):
+        n_request = uuid.uuid1()
+        request_data = {
+            "passenger": f'{name} {last_name}',
+            "city_from": city_from,
+            "city_to": city_to,
+            "date": date,
+            "hour": hour,
+            "n_passengers": n_passengers,
+            "cel_number": cel_number
+        }
+
+        post_request = requests.patch(
+            f'https://remasterautostop-fc4ec.firebaseio.com/passengers_request/{n_request}.json',
+            data=json.dumps(request_data)
+        )
+    
 
 #MyFirebase().sign_in("luciano@correo.com", "12341234")
