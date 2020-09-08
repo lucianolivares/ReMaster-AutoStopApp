@@ -5,7 +5,10 @@ from kivymd.uix.button import MDFlatButton
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.picker import MDDatePicker, MDTimePicker
 from kivymd.uix.screen import MDScreen
+from kivymd.uix.label import MDLabel
 
+from kivy.clock import Clock
+from trips_banner import TripsBanner
 from myfirebase import Database
 
 Builder.load_string('''
@@ -58,10 +61,18 @@ Builder.load_string('''
 <PassengersAvailableScreen>:
     add_request_button: add_request_button
 
-    MDFloatLayout:
-        MDLabel:
-            text: "Pasajeros Disponibles"
-            font_style: "H2"
+    MDScrollViewRefreshLayout:
+        id: refresh_layout
+        refresh_callback: root.refresh_callback
+        root_layout: root
+
+        MDGridLayout:
+            id: passengers_grid
+            cols: 1
+            padding: 10, 10
+            spacing: 10, 10
+            adaptive_height: True
+            row_default_height: 650
 
 
     MDFloatingActionButton:
@@ -93,9 +104,41 @@ class PassengersAvailableScreen(MDScreen):
         self.city_to = None
         self.hour = None
         self.n_passenger = int
-    
+        # Charge Passengers Data
+        self.refresh_available_passengers()
+
     def on_pre_enter(self, *args):
         self.add_request_button.bind(on_release=self.show_add_request_dialog)
+
+    def refresh_available_passengers(self):
+        try:
+            passengers_data = DATABASE.trips_available("passengers_request")
+            for passenger, data in passengers_data.items():
+                self.ids.passengers_grid.add_widget(TripsBanner(
+                    city_from=data['city_from'],
+                    city_to=data['city_to'],
+                    name=data['passenger'],
+                    cel_number=data['cel_number'],
+                    date=data['date'],
+                    hour=data['hour'],
+                    seats=data['n_passengers'],
+                    trip_id=passenger
+                ))
+        except Exception as e:
+            print(e)
+            self.ids.passengers_grid.add_widget(MDLabel(text="No hay Pasajeros Disponibles"))
+    
+
+    def refresh_callback(self, *args):
+        '''A method that updates the state of your application
+        while the spinner remains on the screen.'''
+
+        def refresh_callback(interval):
+            self.ids.passengers_grid.clear_widgets()
+            self.refresh_available_passengers()
+            self.ids.refresh_layout.refresh_done()
+
+        Clock.schedule_once(refresh_callback, 1)
 
 
     def show_add_request_dialog(self, instance_button):

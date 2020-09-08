@@ -105,8 +105,8 @@ class TripsBanner(MDFloatLayout):
         self.city_to = kw['city_to']
 
         self.ids.title.text = f"{self.city_from} -> {self.city_to}"
-        self.ids.driver.text = kw['driver']
-        self.ids.plate.text = kw['plate']
+        self.ids.name.text = kw['name']
+        self.ids.plate.text = plate
         self.ids.cel_number.text = kw['cel_number']
         self.ids.hour.text = kw['hour']
         self.ids.date.text = kw['date']

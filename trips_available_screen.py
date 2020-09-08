@@ -6,6 +6,7 @@ from kivymd.uix.dialog import MDDialog
 from kivymd.uix.picker import MDTimePicker, MDDatePicker
 from kivymd.uix.screen import MDScreen
 from kivy.clock import Clock
+from kivymd.uix.label import MDLabel
 
 from trips_banner import TripsBanner
 from myfirebase import Database
@@ -108,15 +109,35 @@ class TripsAvailableScreen(MDScreen):
         self.city_to = None
         self.hour = None
         self.n_passenger = int
+        # Charge Trips
+        self.refresh_available_trips()
 
     def on_pre_enter(self, *args):
         self.add_trip_button.bind(on_release=self.show_add_trip_dialog)
+        
+    def refresh_available_trips(self):
+        try :
+            trips_data = DATABASE.trips_available("trips_available")
+            for trip, data in trips_data.items():
+                self.ids.trips_grid.add_widget(TripsBanner(
+                    city_from=data['city_from'],
+                    city_to=data['city_to'],
+                    name=data['driver'],
+                    plate=data['plate'],
+                    cel_number=data['cel_number'],
+                    date=data['date'],
+                    hour=data['hour'],
+                    seats=data['seats_available'],
+                    trip_id=trip
+                ))
+        except :
+            self.ids.trips_grid.add_widget(MDLabel(text="No hay Viajes Disponibles"))
 
-        ##Test
-        self.ids.trips_grid.add_widget(TripsBanner())
 
     def refresh_callback(self, *args):
         def refresh_callback(interval):
+            self.ids.trips_grid.clear_widgets()
+            self.refresh_available_trips()
             self.ids.refresh_layout.refresh_done()
 
         Clock.schedule_once(refresh_callback, 1)
