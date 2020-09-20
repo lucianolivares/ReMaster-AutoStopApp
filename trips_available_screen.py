@@ -1,66 +1,16 @@
+from kivy.clock import Clock
 from kivy.lang import Builder
 from kivymd.app import MDApp
-from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDFlatButton
 from kivymd.uix.dialog import MDDialog
-from kivymd.uix.picker import MDTimePicker, MDDatePicker
-from kivymd.uix.screen import MDScreen
-from kivy.clock import Clock
 from kivymd.uix.label import MDLabel
+from kivymd.uix.screen import MDScreen
 
-from trips_banner import TripsBanner
+from add_trip_layout import AddTripLayout
 from myfirebase import Database
+from trips_banner import TripsBanner
 
 Builder.load_string('''
-<AddTripDialog>
-    orientation: "vertical"
-    spacing: "8dp"
-    size_hint_y: None
-    height: "300dp"
-
-    date_picker: date_picker
-
-    MDTextField:
-        id: city_from
-        hint_text: "Desde"
-        on_text_validate: city_to.focus = True
-
-    MDTextField:
-        id: city_to
-        hint_text: "Para"
-    
-    MDBoxLayout:
-        orientation: "horizontal"
-
-        MDLabel:
-            id: date_label
-            size_hint_x: .9
-            text: "Fecha"
-            theme_text_color: "Secondary"
-            
-        MDIconButton:
-            id: date_picker
-            size_hint_x: .2
-            icon: "calendar-edit"
-
-    MDBoxLayout:
-        orientation: "horizontal"
-        
-        MDLabel:
-            id: hour_label
-            size_hint_x: .9
-            text: "Hora"
-            theme_text_color: "Secondary"
-            
-        MDIconButton:
-            id: hour_picker
-            size_hint_x: .2
-            icon: "clock"
-    
-    MDTextField:
-        id: seats_available
-        hint_text: "Asientos Disponibles"
-
 <TripsAvailableScreen>:
     add_trip_button: add_trip_button
     
@@ -90,12 +40,6 @@ Builder.load_string('''
 APP = MDApp.get_running_app()
 DATABASE = Database()
 
-class AddTripDialog(MDBoxLayout):
-    def __init__(self, **kw):
-        super().__init__()
-        self.ids.hour_picker.on_release = kw["hour_picker"]
-        self.date_picker.on_release = kw["date_picker"]
-
 
 class TripsAvailableScreen(MDScreen):
 
@@ -104,6 +48,7 @@ class TripsAvailableScreen(MDScreen):
         
         self.add_trip_dialog = None
         self.content = None
+        self.hint_text_seats = "Asientos Disponibles"
         # Data
         self.city_from = None
         self.city_to = None
@@ -120,6 +65,7 @@ class TripsAvailableScreen(MDScreen):
             trips_data = DATABASE.trips_available("trips_available")
             for trip, data in trips_data.items():
                 self.ids.trips_grid.add_widget(TripsBanner(
+                    kind_dialog="Trip",
                     city_from=data['city_from'],
                     city_to=data['city_to'],
                     name=data['driver'],
@@ -127,8 +73,9 @@ class TripsAvailableScreen(MDScreen):
                     cel_number=data['cel_number'],
                     date=data['date'],
                     hour=data['hour'],
-                    seats=data['seats_available'],
-                    trip_id=trip
+                    seats=f"{data['seats_available']} Disponibles",
+                    trip_id=trip,
+                    hint_text_seats=self.hint_text_seats
                 ))
         except :
             self.ids.trips_grid.add_widget(MDLabel(text="No hay Viajes Disponibles"))
@@ -148,7 +95,7 @@ class TripsAvailableScreen(MDScreen):
                 size_hint=(.8, .7),
                 title="Añadir Viaje:",
                 type="custom",
-                content_cls=AddTripDialog(hour_picker=self.show_time_picker, date_picker=self.show_date_picker),
+                content_cls=AddTripLayout(seats=self.hint_text_seats),
                 buttons=[
                     MDFlatButton(
                         text="CANCEL",
@@ -165,30 +112,12 @@ class TripsAvailableScreen(MDScreen):
         self.content = self.add_trip_dialog.ids.spacer_top_box.children[0]
         self.add_trip_dialog.open()
 
-    def show_date_picker(self):
-        date_dialog = MDDatePicker(callback=self.get_date)
-        date_dialog.open()
-    
-    def get_date(self, date):
-        self.content.ids.date_label.color = APP.theme_cls.primary_color
-        self.content.ids.date_label.text = date.strftime("%d/%m/%Y")
-
-    def show_time_picker(self):
-        """Open time picker dialog."""
-        time_dialog = MDTimePicker()
-        time_dialog.bind(time=self.get_time)
-        time_dialog.open()
-
-    def get_time(self, instance, time):
-        self.content.ids.hour_label.color = APP.theme_cls.primary_color
-        self.content.ids.hour_label.text = time.strftime("%H:%M")
-
     def add_trip(self, button):
         self.city_from = self.content.ids.city_from.text
         self.city_to = self.content.ids.city_to.text
         self.date = self.content.ids.date_label.text
         self.hour = self.content.ids.hour_label.text
-        self.seats_available = self.content.ids.seats_available.text
+        self.seats_available = self.content.ids.seats.text
 
         if (self.city_from and self.city_to and self.seats_available != "" and
             self.date != "Fecha" and self.hour != "Hora"):

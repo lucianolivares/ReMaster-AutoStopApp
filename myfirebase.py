@@ -114,6 +114,42 @@ class Database():
         )
 
     @staticmethod
+    def update_trip(trip_id, city_from, city_to, date, hour, seats_available):
+        trip_data = {
+            "city_from": city_from,
+            "city_to": city_to,
+            "date": date,
+            "hour": hour,
+            "seats_available": seats_available
+        }
+
+        patch_request = requests.patch(
+            f'https://remasterautostop-fc4ec.firebaseio.com/trips_available/{trip_id}.json',
+            data=json.dumps(trip_data)
+        )
+    
+    @staticmethod
+    def complete_trip(trip_id, driver, city_from, city_to, date, hour, seats_available, cel_number, plate):
+        trip_data = {
+            "driver": driver,
+            "city_from": city_from,
+            "city_to": city_to,
+            "date": date,
+            "hour": hour,
+            "seats_available": seats_available,
+            "cel_number": cel_number,
+            "plate": plate
+        }
+        patch_request = requests.patch(
+            f'https://remasterautostop-fc4ec.firebaseio.com/trips_completed_beta/{trip_id}.json',
+            data=json.dumps(trip_data)
+        )
+
+    @staticmethod
+    def delete_trip(trip_id):
+        post_request = requests.delete(f'https://remasterautostop-fc4ec.firebaseio.com/trips_available/{trip_id}.json')
+
+    @staticmethod
     def add_passenger_request(name, last_name, city_from, city_to, date, hour, n_passengers, cel_number):
         n_request = uuid.uuid1()
         request_data = {
@@ -130,7 +166,42 @@ class Database():
             f'https://remasterautostop-fc4ec.firebaseio.com/passengers_request/{n_request}.json',
             data=json.dumps(request_data)
         )
-    
+
+    @staticmethod
+    def update_request(n_request, city_from, city_to, date, hour, n_passengers):
+        request_data = {
+            "city_from": city_from,
+            "city_to": city_to,
+            "date": date,
+            "hour": hour,
+            "n_passengers": n_passengers
+        }
+
+        post_request = requests.patch(
+            f'https://remasterautostop-fc4ec.firebaseio.com/passengers_request/{n_request}.json',
+            data=json.dumps(request_data)
+        )
+
+    @staticmethod
+    def complete_request(n_request, passenger, city_from, city_to, date, hour, n_passengers, cel_number):
+        request_data = {
+            "passenger": passenger,
+            "city_from": city_from,
+            "city_to": city_to,
+            "date": date,
+            "hour": hour,
+            "n_passengers": n_passengers,
+            "cel_number": cel_number
+        }
+        post_request = requests.patch(
+            f'https://remasterautostop-fc4ec.firebaseio.com/passengers_requests_completed_beta/{n_request}.json',
+            data=json.dumps(request_data)
+        )
+
+    @staticmethod
+    def delete_passenger_request(request_id):
+        post_request = requests.delete(f'https://remasterautostop-fc4ec.firebaseio.com/passengers_request/{request_id}.json')
+
     @staticmethod
     def trips_available(type_request):
         get_request = requests.get(f'https://remasterautostop-fc4ec.firebaseio.com/{type_request}.json')
