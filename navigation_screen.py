@@ -48,11 +48,17 @@ class NavigationScreen(MDScreen):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.app = MDApp.get_running_app()
+
+        """[summary]
+        Import of the screens that the navigation_layout will have and a dictionary
+        is created with them as key and the value is a tuple with 
+        the identification that will be given to the screen, the title and the icon
+        """
         # Lista de las pantallas, (id, Título("text"), icono)
         from trips_available_screen import TripsAvailableScreen
         from passengers_available_screen import PassengersAvailableScreen
         from settings_screen import SettingsScreen
+
         self.list_screen = {
             TripsAvailableScreen: ("trips_available_screen", "Viajes Disponibles", "car-multiple"),
             PassengersAvailableScreen:("passengers_available_screen", "Pasajeros Disponibles", "seat-passenger"),

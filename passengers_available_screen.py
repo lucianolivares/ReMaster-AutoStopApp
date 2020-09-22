@@ -5,6 +5,9 @@ from kivymd.uix.dialog import MDDialog
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.label import MDLabel
 
+import threading
+from kivy.clock import mainthread
+
 from kivy.clock import Clock
 
 from add_trip_layout import AddTripLayout
@@ -55,15 +58,23 @@ class PassengersAvailableScreen(MDScreen):
         self.hour = None
         self.n_passenger = int
         # Charge Passengers Data
-        self.refresh_available_passengers()
+        self.start_second_thread()
 
     def on_pre_enter(self, *args):
         self.add_request_button.bind(on_release=self.show_add_request_dialog)
 
-    def refresh_available_passengers(self):
+    def start_second_thread(self):
+        threading.Thread(target=self.load_data).start()
+
+    def load_data(self):
+        trips_data = DATABASE.trips_available("passengers_request")
+        self.ids.passengers_grid.clear_widgets()
+        
+        self.refresh_available_passengers(trips_data)
+
+    def refresh_available_passengers(self, trips_data):
         try:
-            passengers_data = DATABASE.trips_available("passengers_request")
-            for passenger, data in passengers_data.items():
+            for passenger, data in trips_data.items():
                 self.ids.passengers_grid.add_widget(TripsBanner(
                     kind_dialog="Request",
                     city_from=data['city_from'],
@@ -74,7 +85,8 @@ class PassengersAvailableScreen(MDScreen):
                     hour=data['hour'],
                     seats=f"{data['n_passengers']} Pasajeros",
                     trip_id=passenger,
-                    hint_text_seats=self.hint_text_seats
+                    hint_text_seats=self.hint_text_seats,
+                    reload_data=self.start_second_thread
                 ))
         except Exception as e:
             self.ids.passengers_grid.add_widget(MDLabel(text="No hay Pasajeros Disponibles"))
@@ -83,19 +95,16 @@ class PassengersAvailableScreen(MDScreen):
     def refresh_callback(self, *args):
         '''A method that updates the state of your application
         while the spinner remains on the screen.'''
-
         def refresh_callback(interval):
-            self.ids.passengers_grid.clear_widgets()
-            self.refresh_available_passengers()
             self.ids.refresh_layout.refresh_done()
 
+        self.start_second_thread()
         Clock.schedule_once(refresh_callback, 1)
-
 
     def show_add_request_dialog(self, instance_button):
         """[summary]
-        Función encargada de inicializar una ventana emergente en la cual podemos ingresar una nueva
-        solicitud de viaje
+        Function in charge of initializing a pop-up window in which 
+        we can enter a new travel request
         """
         if not self.add_request_dialog:
             self.add_request_dialog = MDDialog(
@@ -119,6 +128,10 @@ class PassengersAvailableScreen(MDScreen):
         self.add_request_dialog.open()
 
     def add_request(self, button):
+        """[summary]
+        Collect the data and run the method in myfirebase that creates a new 
+        request in the cloud
+        """
         self.city_from = self.content.ids.city_from.text
         self.city_to = self.content.ids.city_to.text
         self.date = self.content.ids.date_label.text
@@ -134,9 +147,13 @@ class PassengersAvailableScreen(MDScreen):
                 self.n_passengers, APP.data['cel_number']
             )
             self.close_dialog("")
+            self.start_second_thread()
         else:
             print("Debes Completar Todos Los Datos")
 
     def close_dialog(self, button):
+        """[summary]
+        close and delete the add trip dialog
+        """
         self.add_request_dialog.dismiss()
         self.add_request_dialog = None

@@ -24,13 +24,17 @@ class Login():
             # Refresh self.data
             user_data = requests.get(f'https://remasterautostop-fc4ec.firebaseio.com/users/{login_data["localId"]}.json')
             APP.data = json.loads(user_data.content.decode())
+            
             # Change to NavigationScreen and remove login_screen
-            login_screen = APP.root.current_screen
+            screens = APP.root.screens
+            
             from navigation_screen import NavigationScreen
             self.nav_screen = NavigationScreen()
             APP.root.add_widget(self.nav_screen)
             APP.root.current = "navigation_screen"
-            APP.root.remove_widget(login_screen)
+
+            APP.root.clear_widgets(screens)
+            
             return True
 
         else:

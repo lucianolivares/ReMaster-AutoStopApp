@@ -5,6 +5,8 @@ from kivymd.uix.button import MDFlatButton
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.label import MDLabel
 from kivymd.uix.screen import MDScreen
+import threading
+from kivy.clock import mainthread
 
 from add_trip_layout import AddTripLayout
 from myfirebase import Database
@@ -55,14 +57,22 @@ class TripsAvailableScreen(MDScreen):
         self.hour = None
         self.n_passenger = int
         # Charge Trips
-        self.refresh_available_trips()
+        self.start_second_thread()
 
     def on_pre_enter(self, *args):
         self.add_trip_button.bind(on_release=self.show_add_trip_dialog)
         
-    def refresh_available_trips(self):
+    def start_second_thread(self):
+        threading.Thread(target=self.load_data).start()
+
+    def load_data(self):
+        trips_data = DATABASE.trips_available("trips_available")
+        self.ids.trips_grid.clear_widgets()
+        self.refresh_available_trips(trips_data)
+
+    @mainthread
+    def refresh_available_trips(self, trips_data):
         try :
-            trips_data = DATABASE.trips_available("trips_available")
             for trip, data in trips_data.items():
                 self.ids.trips_grid.add_widget(TripsBanner(
                     kind_dialog="Trip",
@@ -75,21 +85,28 @@ class TripsAvailableScreen(MDScreen):
                     hour=data['hour'],
                     seats=f"{data['seats_available']} Disponibles",
                     trip_id=trip,
-                    hint_text_seats=self.hint_text_seats
+                    hint_text_seats=self.hint_text_seats,
+                    reload_data=self.start_second_thread
                 ))
         except :
             self.ids.trips_grid.add_widget(MDLabel(text="No hay Viajes Disponibles"))
 
 
     def refresh_callback(self, *args):
+        '''A method that updates the state of your application
+        while the spinner remains on the screen.'''
         def refresh_callback(interval):
-            self.ids.trips_grid.clear_widgets()
-            self.refresh_available_trips()
+            #self.refresh_available_trips()
             self.ids.refresh_layout.refresh_done()
 
+        self.start_second_thread()
         Clock.schedule_once(refresh_callback, 1)
 
     def show_add_trip_dialog(self, instance_button):
+        """[summary]
+        Function in charge of initializing a pop-up window in which
+        we can enter a new trip available
+        """
         if not self.add_trip_dialog:
             self.add_trip_dialog = MDDialog(
                 size_hint=(.8, .7),
@@ -113,6 +130,10 @@ class TripsAvailableScreen(MDScreen):
         self.add_trip_dialog.open()
 
     def add_trip(self, button):
+        """[summary]
+        Collect the data and run the method in myfirebase that creates a new 
+        trip in the cloud
+        """
         self.city_from = self.content.ids.city_from.text
         self.city_to = self.content.ids.city_to.text
         self.date = self.content.ids.date_label.text
@@ -129,10 +150,14 @@ class TripsAvailableScreen(MDScreen):
             )
 
             self.close_dialog("")
+            self.start_second_thread()
 
         else:
             print("Debes Completar Todos Los Datos")
         
     def close_dialog(self, button):
+        """[summary]
+        close and delete the add trip dialog
+        """
         self.add_trip_dialog.dismiss()
         self.add_trip_dialog = None 

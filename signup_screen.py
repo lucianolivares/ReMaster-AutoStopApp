@@ -123,7 +123,7 @@ class SignupScreen(MDScreen):
         """
         self.ids.back_button.bind(on_release=self.change_screen)
         self.ids.signup_button.bind(on_release=self.signup_button_action)
-    
+
     def signup_button_action(self, instance):
         """[summary]
         Check if the driver checkbox is activated if it is not, 

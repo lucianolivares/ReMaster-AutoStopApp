@@ -107,6 +107,9 @@ APP = MDApp.get_running_app()
 DATABASE = Database()
 
 class TripsBanner(MDFloatLayout):
+    """[summary]
+    Layout for passenger or travel banner available
+    """
     def __init__(self, plate="", **kw):
         super().__init__()
         self.kind_dialog = kw['kind_dialog']
@@ -114,6 +117,7 @@ class TripsBanner(MDFloatLayout):
         self.trip_id = kw['trip_id']
         self.city_from = kw['city_from']
         self.city_to = kw['city_to']
+        self.reload_data = kw['reload_data']
 
         self.ids.title.text = f"{self.city_from} -> {self.city_to}"
         self.ids.name.text = kw['name']
@@ -127,7 +131,10 @@ class TripsBanner(MDFloatLayout):
             self.remove_widget(self.ids.plate)
     
     def open_edit_dialog(self):
-        # Open Dialog
+        """[summary]
+        Function in charge of initializing a pop-up window in which
+        we can edit a trip available or a request
+        """
         self.edit_trip_dialog = MDDialog(
             size_hint=(.8, .7),
             title=f"Editar Viaje: {self.ids.title.text}",
@@ -150,10 +157,17 @@ class TripsBanner(MDFloatLayout):
         self.edit_trip_dialog.open()
         
     def close_dialog(self, button):
+        """[summary]
+        close and delete the edit trip dialog
+        """
         self.edit_trip_dialog.dismiss()
         self.edit_trip_dialog = None 
     
     def edit_trip(self, button):
+        """[summary]
+        Collect the data and run the method in myfirebase that edit
+        a request in the cloud
+        """
         self.city_from = self.content.ids.city_from.text
         self.city_to = self.content.ids.city_to.text
         self.date = self.content.ids.date_label.text
@@ -171,12 +185,16 @@ class TripsBanner(MDFloatLayout):
 
             update_kind(self.trip_id, self.city_from, self.city_to, self.date, self.hour, self.seats)
             self.close_dialog("")
-            #self.second_thread()
+            self.reload_data()
         
         else:
             print("Debes Completar Todos Los Datos")
     
     def complete_trip(self):
+        """[summary]
+        Collect the data and run the method in myfirebase that save the trip in
+        complete data, and delete it from trips or requests available
+        """
         if self.kind_dialog == "Request":
             DATABASE.complete_request(
                 self.trip_id,
@@ -205,8 +223,11 @@ class TripsBanner(MDFloatLayout):
             self.delete_trip()
 
     def delete_trip(self):
+        """[summary]
+        Delete the trip or requests in the cloud 
+        """
         if self.kind_dialog == "Request":
             DATABASE.delete_passenger_request(self.trip_id)
         else:
             DATABASE.delete_trip(self.trip_id)
-        #self.second_thread()
+        self.reload_data()

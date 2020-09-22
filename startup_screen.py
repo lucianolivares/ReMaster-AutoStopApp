@@ -19,6 +19,9 @@ Builder.load_string("""
         
 """)
 
+APP = MDApp.get_running_app()
+LOGIN = Login()
+
 class StartupScreen(MDScreen):
     """[summary]
     StartupScreen is to start the application with the logo of the application
@@ -27,24 +30,30 @@ class StartupScreen(MDScreen):
     """
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.app = MDApp.get_running_app()
-        self.login = Login()
+        APP = MDApp.get_running_app()
+        LOGIN = Login()
 
     def on_pre_enter(self, *args):
         try:
             # Try to read the persisten signing credentials (refresh token)
             # Use refresh token to get a new idToken
-            self.login.exchange_refresh_token()
+            LOGIN.exchange_refresh_token()
             Clock.schedule_once(lambda dt: self.load_navigation_screen(), 2)
         except:
             Clock.schedule_once(lambda dt: self.load_login_screen(), 2)
 
     def load_navigation_screen(self):
         nav_screen = NavigationScreen()
-        self.app.root.add_widget(nav_screen)
-        self.app.root.current = "navigation_screen"
+        APP.root.add_widget(nav_screen)
+        APP.root.current = "navigation_screen"
+        self.remove_screen()
 
     def load_login_screen(self):
         login_screen = LoginScreen()
-        self.app.root.add_widget(login_screen)
-        self.app.root.current = "login_screen"
+        APP.root.add_widget(login_screen)
+        APP.root.current = "login_screen"
+        self.remove_screen()
+    
+    def remove_screen(self):
+        current = APP.root.get_screen("startup_screen")
+        APP.root.remove_widget(current)
