@@ -69,7 +69,7 @@ class NavigationScreen(MDScreen):
 
         self.list_screen = {
             TripsAvailableScreen: ("trips_available_screen", "Viajes Disponibles", "car-multiple"),
-            PassengersAvailableScreen:("passengers_available_screen", "Pasajeros Disponibles", "seat-passenger"),
+            PassengersAvailableScreen:("passengers_available_screen", "Pasajeros Disponibles", "seatbelt"),
             SettingsScreen: ("settings_screen", "Configuración", "settings")
         }
     
