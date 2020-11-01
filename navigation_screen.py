@@ -41,6 +41,14 @@ Builder.load_string('''
                     MDList:
                         id: nav_list
 
+                MDLabel:
+                    id: watermark
+                    size_hint_y: .08
+                    text_size: (None, 10)
+                    theme_text_color: "Secondary"
+                    text: "Developed by Luciano Olivares"
+                    font_style: "Overline"
+
 ''')
 
 

@@ -56,11 +56,12 @@ class TripsAvailableScreen(MDScreen):
         self.city_to = None
         self.hour = None
         self.n_passenger = int
-        # Charge Trips
-        self.start_second_thread()
+        
 
     def on_pre_enter(self, *args):
         self.add_trip_button.bind(on_release=self.show_add_trip_dialog)
+        # Charge Trips
+        self.start_second_thread()
         
     def start_second_thread(self):
         threading.Thread(target=self.load_data).start()

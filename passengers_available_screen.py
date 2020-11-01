@@ -57,11 +57,12 @@ class PassengersAvailableScreen(MDScreen):
         self.city_to = None
         self.hour = None
         self.n_passenger = int
-        # Charge Passengers Data
-        self.start_second_thread()
+        
 
     def on_pre_enter(self, *args):
         self.add_request_button.bind(on_release=self.show_add_request_dialog)
+        # Charge Passengers Data
+        self.start_second_thread()
 
     def start_second_thread(self):
         threading.Thread(target=self.load_data).start()
@@ -72,6 +73,7 @@ class PassengersAvailableScreen(MDScreen):
         
         self.refresh_available_passengers(trips_data)
 
+    @mainthread
     def refresh_available_passengers(self, trips_data):
         try:
             for passenger, data in trips_data.items():

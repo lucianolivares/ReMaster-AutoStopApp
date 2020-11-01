@@ -1,7 +1,7 @@
 from kivymd.uix.floatlayout import MDFloatLayout
 from kivy.lang import Builder
 from kivymd.uix.dialog import MDDialog
-from kivymd.uix.button import MDFlatButton
+from kivymd.uix.button import MDFlatButton, MDRaisedButton
 from kivymd.app import MDApp
 
 from myfirebase import Database
@@ -80,7 +80,7 @@ Builder.load_string("""
         pos_hint: {"center_x": .05, "center_y": .9}
         size_hint: (.15, .15)
         theme_text_color: "Error"
-        on_release: root.delete_trip()
+        on_release: root.delete_trip_dialog()
 
     MDIconButton:
         id: edit_button
@@ -156,13 +156,8 @@ class TripsBanner(MDFloatLayout):
         self.content = self.edit_trip_dialog.ids.spacer_top_box.children[0]
         self.edit_trip_dialog.open()
         
-    def close_dialog(self, button):
-        """[summary]
-        close and delete the edit trip dialog
-        """
-        self.edit_trip_dialog.dismiss()
-        self.edit_trip_dialog = None 
     
+
     def edit_trip(self, button):
         """[summary]
         Collect the data and run the method in myfirebase that edit
@@ -184,7 +179,7 @@ class TripsBanner(MDFloatLayout):
                 update_kind = DATABASE.update_trip
 
             update_kind(self.trip_id, self.city_from, self.city_to, self.date, self.hour, self.seats)
-            self.close_dialog("")
+            self.close_dialog(button)
             self.reload_data()
         
         else:
@@ -222,7 +217,24 @@ class TripsBanner(MDFloatLayout):
             )
             self.delete_trip()
 
-    def delete_trip(self):
+
+    def delete_trip_dialog(self):
+        self.delete_dialog = MDDialog(
+            text = "¿ Quieres Eliminar el viaje ?",
+            buttons=[
+                MDFlatButton(
+                    text="CANCELAR",
+                    on_release=self.close_dialog
+                ),
+                MDRaisedButton(
+                    text="ELIMINAR",
+                    on_release=self.delete_trip
+                )
+            ]
+        )
+        self.delete_dialog.open()
+
+    def delete_trip(self, button):
         """[summary]
         Delete the trip or requests in the cloud 
         """
@@ -231,3 +243,12 @@ class TripsBanner(MDFloatLayout):
         else:
             DATABASE.delete_trip(self.trip_id)
         self.reload_data()
+
+        self.close_dialog(button) 
+
+    def close_dialog(self, button):
+        """[summary]
+        close and delete the dialog
+        """
+        button.parent.parent.parent.parent.dismiss()
+        button.parent.parent.parent.parent = None 

@@ -1,7 +1,7 @@
 import requests
 import json
 import uuid
-
+import logging
 
 from kivymd.app import MDApp
 
@@ -16,27 +16,22 @@ class Login():
         login_payload = {"email": email, "password": password, "returnSecureToken":True}
         login_request = requests.post(login_url, data=login_payload)
         login_data = json.loads(login_request.content.decode())
+
         if login_request.ok:
             refresh_token = login_data["refreshToken"]
             with open("resources/refresh_token.txt", "w") as f:
                 f.write(refresh_token)
             
-            # Refresh self.data
-            user_data = requests.get(f'https://remasterautostop-fc4ec.firebaseio.com/users/{login_data["localId"]}.json')
-            APP.data = json.loads(user_data.content.decode())
+            localId = login_data["localId"]
+            self.refresh_data(localId)
             
             # Change to NavigationScreen and remove login_screen
-            screens = APP.root.screens
-            
             from navigation_screen import NavigationScreen
-            self.nav_screen = NavigationScreen()
-            APP.root.add_widget(self.nav_screen)
+            APP.root.add_widget(NavigationScreen())
             APP.root.current = "navigation_screen"
-
-            APP.root.clear_widgets(screens)
             
             return True
-
+            
         else:
             return login_data["error"]["message"]
 
@@ -47,36 +42,36 @@ class Login():
         refresh_url = "https://securetoken.googleapis.com/v1/token?key=" + WAK
         refresh_payload = '{"grant_type": "refresh_token", "refresh_token": "%s"}' % refresh_token
         refresh_req = requests.post(refresh_url, data=refresh_payload)
-        id_token = refresh_req.json()['id_token']
-        APP.local_id = refresh_req.json()['user_id']
-        user_data = requests.get(f'https://remasterautostop-fc4ec.firebaseio.com/users/{APP.local_id}.json')
+
+        localId = refresh_req.json()['user_id']
+        self.refresh_data(localId)
+
+    @staticmethod
+    def refresh_data(localId):
+        user_data = requests.get(f'https://remasterautostop-fc4ec.firebaseio.com/users/{localId}.json')
+        APP.localId = localId
         APP.data = json.loads(user_data.content.decode())
-        return True
 
 class Signup():
     @staticmethod
-    def signup_passenger(localId, name, last_name, cel_number):
-        new_user_data = {
-            'name': name,
-            'last_name': last_name,
-            'cel_number': cel_number,
-            'driver': {}
-        }
+    def signup_passenger(localId, new_user_data):
         post_request = requests.patch(
             f'https://remasterautostop-fc4ec.firebaseio.com/users/{localId}.json',
             data=json.dumps(new_user_data)
         )
+        if not post_request.ok:
+            return False
+        return True
 
     @staticmethod
-    def signup_driver(localId, rut, plate):
-        driver_data = {
-            'rut': rut,
-            'plate': plate
-        }
+    def signup_driver(localId, driver_data):
         post_request = requests.patch(
             f'https://remasterautostop-fc4ec.firebaseio.com/users/{localId}/driver.json',
             data=json.dumps(driver_data)
         )
+        if not post_request.ok:
+            return False
+        return True
 
     def signup(self, email, password, name, last_name, cel_number, rut=None, plate=None, driver=False):
         signup_url = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=" + WAK
@@ -84,14 +79,26 @@ class Signup():
             "email": email,
             "password": password}
         signup_request = requests.post(signup_url, data=signup_payload)
-
         signup_data = json.loads(signup_request.content.decode())
 
         if signup_request.ok:
-            self.signup_passenger(signup_data["localId"], name, last_name, cel_number)
+            new_user_data = {
+                    'name': name,
+                    'last_name': last_name,
+                    'cel_number': cel_number,
+                    'driver': {}
+                }
+            was_registered = self.signup_passenger(signup_data["localId"], new_user_data)
+
             if driver:
-                self.signup_driver(signup_data["localId"], rut, plate)
-            Login().login(email, password)
+                driver_data = {
+                        'rut': rut,
+                        'plate': plate
+                    }
+                was_registered = self.signup_driver(signup_data["localId"], driver_data)
+
+            if was_registered:
+                Login().login(email, password)
 
         else:
             print(signup_data["error"]["message"])
