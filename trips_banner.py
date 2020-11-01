@@ -220,8 +220,8 @@ class TripsBanner(MDFloatLayout):
 
     def delete_trip_dialog(self):
         self.delete_dialog = MDDialog(
-            text = "¿ Quieres Eliminar el viaje ?",
-            size_hint=(.8, .5),
+            title = "¿ Quieres Eliminar el viaje ?",
+            size_hint=(1, 1),
             buttons=[
                 MDFlatButton(
                     text="CANCELAR",
