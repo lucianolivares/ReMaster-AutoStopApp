@@ -14,9 +14,12 @@ class ListIcon(OneLineIconListItem):
 
 def loading_message():
     cargando_mensaje = MDBoxLayout(orientation="vertical")
+    for i in range(2):
+        cargando_mensaje.add_widget(MDLabel(font_size="300sp",
+                                            font_style="H1"))
     cargando_mensaje.add_widget(MDLabel(text="CARGANDO", halign="center", font_size="300sp",
                                         font_style="H5"))
-    for i in range(3):
+    for i in range(2):
         cargando_mensaje.add_widget(MDLabel(font_size="300sp",
                                             font_style="H1"))
 
@@ -27,7 +30,7 @@ def no_trips_message():
     nt_message.add_widget(MDLabel(font_size="300sp", font_style="H1"))
     nt_message.add_widget(MDLabel(text="NO HAY VIAJES PUBLICADOS", halign="center", font_size="300sp",
                                 font_style="H3"))
-    for i in range(3):
+    for i in range(2):
         nt_message.add_widget(MDLabel(font_size="300sp", font_style="H1"))
 
     return nt_message

@@ -65,7 +65,7 @@ class TripsAvailableScreen(MDScreen):
         self.add_trip_button.bind(on_release=self.show_add_trip_dialog)
         # Charge Trips
         self.ids.trips_grid.add_widget(loading_message())
-        self.start_second_thread()
+        #self.start_second_thread()
         
     def start_second_thread(self):
         threading.Thread(target=self.load_data).start()
@@ -105,7 +105,6 @@ class TripsAvailableScreen(MDScreen):
         '''A method that updates the state of your application
         while the spinner remains on the screen.'''
         def refresh_callback(interval):
-            #self.refresh_available_trips()
             self.ids.refresh_layout.refresh_done()
 
         self.start_second_thread()
