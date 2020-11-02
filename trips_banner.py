@@ -1,3 +1,4 @@
+from kivy.uix.relativelayout import RelativeLayout
 from kivymd.uix.floatlayout import MDFloatLayout
 from kivy.lang import Builder
 from kivymd.uix.dialog import MDDialog
@@ -106,7 +107,7 @@ Builder.load_string("""
 APP = MDApp.get_running_app()
 DATABASE = Database()
 
-class TripsBanner(MDFloatLayout):
+class TripsBanner(RelativeLayout):
     """[summary]
     Layout for passenger or travel banner available
     """

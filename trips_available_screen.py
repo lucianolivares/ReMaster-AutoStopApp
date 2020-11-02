@@ -11,6 +11,8 @@ from kivy.clock import mainthread
 from add_trip_layout import AddTripLayout
 from myfirebase import Database
 from trips_banner import TripsBanner
+from classes import *
+import time
 
 Builder.load_string('''
 <TripsAvailableScreen>:
@@ -57,10 +59,12 @@ class TripsAvailableScreen(MDScreen):
         self.hour = None
         self.n_passenger = int
         
+        
 
     def on_pre_enter(self, *args):
         self.add_trip_button.bind(on_release=self.show_add_trip_dialog)
         # Charge Trips
+        self.ids.trips_grid.add_widget(loading_message())
         self.start_second_thread()
         
     def start_second_thread(self):
@@ -68,6 +72,9 @@ class TripsAvailableScreen(MDScreen):
 
     def load_data(self):
         trips_data = DATABASE.trips_available("trips_available")
+        self.ids.trips_grid.clear_widgets()
+        self.ids.trips_grid.add_widget(loading_message())
+        time.sleep(.5)
         self.ids.trips_grid.clear_widgets()
         self.refresh_available_trips(trips_data)
 
@@ -90,7 +97,8 @@ class TripsAvailableScreen(MDScreen):
                     reload_data=self.start_second_thread
                 ))
         except :
-            self.ids.trips_grid.add_widget(MDLabel(text="No hay Viajes Disponibles"))
+            temp = no_trips_message()
+            self.ids.trips_grid.add_widget(temp)
 
 
     def refresh_callback(self, *args):
@@ -101,7 +109,7 @@ class TripsAvailableScreen(MDScreen):
             self.ids.refresh_layout.refresh_done()
 
         self.start_second_thread()
-        Clock.schedule_once(refresh_callback, 1)
+        Clock.schedule_once(refresh_callback, 1.5)
 
     def show_add_trip_dialog(self, instance_button):
         """[summary]

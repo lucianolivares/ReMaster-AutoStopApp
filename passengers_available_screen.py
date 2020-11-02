@@ -13,6 +13,8 @@ from kivy.clock import Clock
 from add_trip_layout import AddTripLayout
 from trips_banner import TripsBanner
 from myfirebase import Database
+from classes import *
+import time
 
 Builder.load_string('''
 <PassengersAvailableScreen>:
@@ -70,7 +72,9 @@ class PassengersAvailableScreen(MDScreen):
     def load_data(self):
         trips_data = DATABASE.trips_available("passengers_request")
         self.ids.passengers_grid.clear_widgets()
-        
+        self.ids.passengers_grid.add_widget(loading_message())
+        time.sleep(.5)
+        self.ids.passengers_grid.clear_widgets()
         self.refresh_available_passengers(trips_data)
 
     @mainthread
@@ -91,7 +95,8 @@ class PassengersAvailableScreen(MDScreen):
                     reload_data=self.start_second_thread
                 ))
         except Exception as e:
-            self.ids.passengers_grid.add_widget(MDLabel(text="No hay Pasajeros Disponibles"))
+            temp = no_trips_message()
+            self.ids.passengers_grid.add_widget(temp)
     
 
     def refresh_callback(self, *args):
@@ -101,7 +106,7 @@ class PassengersAvailableScreen(MDScreen):
             self.ids.refresh_layout.refresh_done()
 
         self.start_second_thread()
-        Clock.schedule_once(refresh_callback, 1)
+        Clock.schedule_once(refresh_callback, 1.5)
 
     def show_add_request_dialog(self, instance_button):
         """[summary]
