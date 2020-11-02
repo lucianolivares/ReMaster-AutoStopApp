@@ -27,7 +27,8 @@ class Login():
             
             # Change to NavigationScreen and remove login_screen
             from navigation_screen import NavigationScreen
-            APP.root.add_widget(NavigationScreen())
+            nav_screen = NavigationScreen()
+            APP.root.add_widget(nav_screen)
             APP.root.current = "navigation_screen"      
             return "True" 
         else:
