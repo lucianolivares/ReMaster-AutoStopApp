@@ -1,7 +1,8 @@
 from kivy.lang import Builder
+from kivy.clock import Clock
 from kivymd.app import MDApp
 from kivymd.uix.screen import MDScreen
-
+from navigation_screen import NavigationScreen
 from myfirebase import Login
 
 Builder.load_string('''
@@ -99,7 +100,15 @@ class LoginScreen(MDScreen):
                 self.login_return = LOGIN.login(email=email, password=password)
                 if not self.login_return == "True":
                     self.ids.error.text = str(self.login_return)
+                else:
+                    Clock.schedule_once(lambda dt: self.load_navigation_screen(), 2)
             else:
                 self.ids.error.text = "Favor Ingresar Contraseña"
         else:
             self.ids.error.text = "Debes Ingresar un Correo"
+
+    def load_navigation_screen(self):
+        nav_screen = NavigationScreen()
+        APP.root.add_widget(nav_screen)
+        APP.root.current = "navigation_screen"
+        APP.root.remove_widget(APP.root.get_screen('login_screen'))

@@ -15,7 +15,7 @@ class Login():
         login_payload = {"email": email, "password": password, "returnSecureToken":True}
         login_request = requests.post(login_url, data=login_payload)
         login_data = json.loads(login_request.content.decode())
-
+        
         if login_request.ok:
             refresh_token = login_data["refreshToken"]
             with open("resources/refresh_token.txt", "w") as f:
@@ -23,14 +23,8 @@ class Login():
             
             localId = login_data["localId"]
             self.refresh_data(localId)
-            
-            # Change to NavigationScreen and remove login_screen
-            
-            nav_screen = NavigationScreen()
-            APP.root.add_widget(nav_screen)
-            APP.root.current = "navigation_screen"
-            APP.root.remove_widget(APP.root.get_screen('login_screen'))
 
+            return "True"
         else:
             return login_data["error"]["message"]
 
