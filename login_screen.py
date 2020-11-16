@@ -98,9 +98,7 @@ class LoginScreen(MDScreen):
         if email != "":
             if password != "":
                 self.login_return = LOGIN.login(email=email, password=password)
-                if not self.login_return == "True":
-                    self.ids.error.text = str(self.login_return)
-                else:
+                if self.login_return:
                     Clock.schedule_once(lambda dt: self.load_navigation_screen(), 2)
             else:
                 self.ids.error.text = "Favor Ingresar Contraseña"

@@ -1,8 +1,8 @@
 import requests
 import json
 import uuid
-from navigation_screen import NavigationScreen
 from kivymd.app import MDApp
+from kivy.network.urlrequest import UrlRequest
 
 WAK = ""
 APP = MDApp.get_running_app()
@@ -12,21 +12,24 @@ class Login():
 
     def login(self, email, password):
         login_url = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=" + WAK
-        login_payload = {"email": email, "password": password, "returnSecureToken":True}
-        login_request = requests.post(login_url, data=login_payload)
-        login_data = json.loads(login_request.content.decode())
-        
-        if login_request.ok:
-            refresh_token = login_data["refreshToken"]
-            with open("resources/refresh_token.txt", "w") as f:
-                f.write(refresh_token)
-            
-            localId = login_data["localId"]
-            self.refresh_data(localId)
-
-            return "True"
+        login_payload = json.dumps({"email": email, "password": password, "returnSecureToken":True})
+        login_request = UrlRequest(login_url, method="POST", req_body=login_payload, on_success=self.testing, on_failure=self.request_failure)
+        login_request.wait()
+        if "error" in login_request.result:
+            return False
         else:
-            return login_data["error"]["message"]
+            return True
+
+    def testing(self, request, result):
+        refresh_token = result["refreshToken"]
+        with open("resources/refresh_token.txt", "w") as f:
+            f.write(refresh_token)
+        
+        localId = result["localId"]
+        self.refresh_data(localId)
+
+    def request_failure(self, request, failure):
+        pass
 
     def exchange_refresh_token(self):
         with open("resources/refresh_token.txt", 'r') as f:
