@@ -65,7 +65,7 @@ class TripsAvailableScreen(MDScreen):
         self.add_trip_button.bind(on_release=self.show_add_trip_dialog)
         # Charge Trips
         self.ids.trips_grid.add_widget(loading_message())
-        #self.start_second_thread()
+        self.start_second_thread()
         
     def start_second_thread(self):
         threading.Thread(target=self.load_data).start()

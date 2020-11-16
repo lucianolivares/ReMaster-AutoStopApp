@@ -1,7 +1,6 @@
 import requests
 import json
 import uuid
-import logging
 from navigation_screen import NavigationScreen
 from kivymd.app import MDApp
 
@@ -29,8 +28,9 @@ class Login():
             
             nav_screen = NavigationScreen()
             APP.root.add_widget(nav_screen)
-            APP.root.current = "navigation_screen"      
-            return "True" 
+            APP.root.current = "navigation_screen"
+            APP.root.remove_widget(APP.root.get_screen('login_screen'))
+
         else:
             return login_data["error"]["message"]
 
@@ -89,19 +89,43 @@ class Signup():
                 }
             was_registered = self.signup_passenger(signup_data["localId"], new_user_data)
 
-            if driver:
-                driver_data = {
-                        'rut': rut,
-                        'plate': plate
-                    }
-                was_registered = self.signup_driver(signup_data["localId"], driver_data)
-
             if was_registered:
-                Login().login(email, password)
+                if driver:
+                    driver_data = {
+                            'rut': rut,
+                            'plate': plate
+                        }
+                    was_registered = self.signup_driver(signup_data["localId"], driver_data)
 
+                    if was_registered:
+                        APP.root.current = "login_screen"  
+                        print("REGISTRO COMPLETO DE CONDUCTOR")
+                    else:
+                        self.delete_account(email, password)
+                        print("ERROR AL REGISTRAR LOS DATOS DE CONDUCTOR")
+                else:
+                    APP.root.current = "login_screen"  
+                    print("REGISTRO COMPLETO DE PASAJERO")
+            else:
+                self.delete_account(email, password)
+                print("ERROR AL REGISTRAR LOS DATOS DE PASAJERO")
         else:
             print(signup_data["error"]["message"])
 
+    def delete_account(self, email, password):
+        login_url = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=" + WAK
+        login_payload = {"email": email, "password": password, "returnSecureToken":True}
+        login_request = requests.post(login_url, data=login_payload)
+        login_data = json.loads(login_request.content.decode())
+
+        delete_account_url = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/deleteAccount?key=" + WAK
+        delete_payload = {
+            "idToken": login_data["idToken"],
+            "localId": login_data["localId"]
+        }
+        signout_request = requests.post(delete_account_url, data=delete_payload)
+        return signout_request
+    
 class Database():
 
     @staticmethod

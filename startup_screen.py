@@ -30,8 +30,6 @@ class StartupScreen(MDScreen):
     """
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        APP = MDApp.get_running_app()
-        LOGIN = Login()
 
     def on_pre_enter(self, *args):
         try:
