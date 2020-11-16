@@ -3,22 +3,20 @@ import json
 import uuid
 from kivymd.app import MDApp
 from kivy.network.urlrequest import UrlRequest
+from navigation_screen import NavigationScreen
 
 WAK = ""
 APP = MDApp.get_running_app()
 
 
 class Login():
+    def __init__(self) -> None:
+        self.login_error = None
 
     def login(self, email, password):
         login_url = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=" + WAK
         login_payload = json.dumps({"email": email, "password": password, "returnSecureToken":True})
         login_request = UrlRequest(login_url, method="POST", req_body=login_payload, on_success=self.testing, on_failure=self.request_failure)
-        login_request.wait()
-        if "error" in login_request.result:
-            return False
-        else:
-            return True
 
     def testing(self, request, result):
         refresh_token = result["refreshToken"]
@@ -42,11 +40,18 @@ class Login():
         localId = refresh_req.json()['user_id']
         self.refresh_data(localId)
 
-    @staticmethod
-    def refresh_data(localId):
+    def refresh_data(self, localId):
+        # Pasar requests a UrlResquest 
         user_data = requests.get(f'https://remasterautostop-fc4ec.firebaseio.com/users/{localId}.json')
         APP.localId = localId
         APP.data = json.loads(user_data.content.decode())
+        self.load_navigation_screen()
+
+    def load_navigation_screen(self):
+        nav_screen = NavigationScreen()
+        APP.root.add_widget(nav_screen)
+        APP.root.current = "navigation_screen"
+        APP.root.remove_widget(APP.root.get_screen('login_screen'))
 
 class Signup():
     @staticmethod
