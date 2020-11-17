@@ -22,7 +22,7 @@ def refresh_data(localId):
     # Pasar requests a UrlResquest 
     APP.localId = localId
     data_url = f'https://remasterautostop-fc4ec.firebaseio.com/users/{APP.localId}.json'
-    user_data = UrlRequest(data_url, on_success=load_navigation_screen)
+    user_data = UrlRequest(data_url, verify=False, on_success=load_navigation_screen)
 
 def load_navigation_screen(request, result):
     # SAVE USER DATA ON THE APP AND LOAD THE NAVIGATION_SCREEN

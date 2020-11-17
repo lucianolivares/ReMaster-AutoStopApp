@@ -100,7 +100,7 @@ class LoginScreen(MDScreen):
 
         login_url = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=" + APP.WAK
         login_payload = json.dumps({"email": email, "password": password, "returnSecureToken":True})
-        login_request = UrlRequest(login_url, method="POST", req_body=login_payload, on_success=self.request_success, on_failure=self.request_failure)
+        login_request = UrlRequest(login_url, method="POST", verify=False, req_body=login_payload, on_success=self.request_success, on_failure=self.request_failure)
 
     def request_success(self, request, result):
         # SAVE REFRESH_TOKEN ON RESOURCES/REFRESHTOKEN.TXT
@@ -110,7 +110,7 @@ class LoginScreen(MDScreen):
         # SAVE LOCALID ON THE APP AND GET USER DATA FROM FIREBASE
         APP.localId = result["localId"]
         data_url = f'https://remasterautostop-fc4ec.firebaseio.com/users/{APP.localId}.json'
-        user_data = UrlRequest(data_url, on_success=self.load_navigation_screen)
+        user_data = UrlRequest(data_url, verify=False, on_success=self.load_navigation_screen)
 
     def request_failure(self, request, failure):
         self.ids.error.text = failure["error"]["message"]

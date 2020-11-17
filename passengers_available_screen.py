@@ -65,7 +65,7 @@ class PassengersAvailableScreen(MDScreen):
 
     def trips_available(self):
         url = f'https://remasterautostop-fc4ec.firebaseio.com/passengers_request.json'
-        get_request = UrlRequest(url, on_success=self.load_data)
+        get_request = UrlRequest(url, verify=False, on_success=self.load_data)
 
     def load_data(self, request, result):
         trips_data = result
