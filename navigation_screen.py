@@ -72,9 +72,7 @@ class NavigationScreen(MDScreen):
             PassengersAvailableScreen:("passengers_available_screen", "Pasajeros Disponibles", "seatbelt"),
             SettingsScreen: ("settings_screen", "Configuración", "settings")
         }
-    
-    def on_enter(self):
-        # Bucle para añadir pantallas según diccionario list_screen a screen manager y lista de botones a nav_drawer
+
         for screen, details in self.list_screen.items():
             identification, text, icon = details
             self.ids.screen_manager.add_widget(screen(name=identification))

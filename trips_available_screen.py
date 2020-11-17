@@ -59,14 +59,12 @@ class TripsAvailableScreen(MDScreen):
         self.hour = None
         self.n_passenger = int
         
-        
-
     def on_pre_enter(self, *args):
         self.add_trip_button.bind(on_release=self.show_add_trip_dialog)
         # Charge Trips
         self.ids.trips_grid.add_widget(loading_message())
         self.start_second_thread()
-        
+
     def start_second_thread(self):
         threading.Thread(target=self.load_data).start()
 
@@ -99,7 +97,6 @@ class TripsAvailableScreen(MDScreen):
         except :
             temp = no_trips_message()
             self.ids.trips_grid.add_widget(temp)
-
 
     def refresh_callback(self, *args):
         '''A method that updates the state of your application

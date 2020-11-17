@@ -2,8 +2,11 @@ from kivy.lang import Builder
 from kivy.clock import Clock
 from kivymd.app import MDApp
 from kivymd.uix.screen import MDScreen
+from kivy.network.urlrequest import UrlRequest
+import json
+from navigation_screen import NavigationScreen
+import requests
 
-from myfirebase import Login
 
 Builder.load_string('''
 <MDTextFieldCustom@MDTextFieldRound>
@@ -65,7 +68,6 @@ Builder.load_string('''
 ''')
 
 APP = MDApp.get_running_app()
-LOGIN = Login()
 
 class LoginScreen(MDScreen):
     def on_pre_enter(self, *args):
@@ -88,19 +90,38 @@ class LoginScreen(MDScreen):
 
         APP.root.current = "signup_screen"
         
-    def login(self, instance):
+
+    def login(self, button):
         """[summary]
         Function in charge of collecting the information entered by the user and checking
         if the user exists in case of being false the error is displayed on the screen
         """
         email = self.ids.email.text
         password = self.ids.password.text
-        if email != "":
-            if password != "":
-                LOGIN.login(email=email, password=password)
-            else:
-                self.ids.error.text = "Favor Ingresar Contraseña"
-        else:
-            self.ids.error.text = "Debes Ingresar un Correo"
 
-    
+        login_url = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=" + APP.WAK
+        login_payload = json.dumps({"email": email, "password": password, "returnSecureToken":True})
+        login_request = UrlRequest(login_url, method="POST", req_body=login_payload, on_success=self.request_success, on_failure=self.request_failure)
+
+    def request_success(self, request, result):
+        # SAVE REFRESH_TOKEN ON RESOURCES/REFRESHTOKEN.TXT
+        refresh_token = result["refreshToken"]
+        with open("resources/refresh_token.txt", "w") as f:
+            f.write(refresh_token)
+        # SAVE LOCALID ON THE APP AND GET USER DATA FROM FIREBASE
+        APP.localId = result["localId"]
+        data_url = f'https://remasterautostop-fc4ec.firebaseio.com/users/{APP.localId}.json'
+        user_data = UrlRequest(data_url, on_success=self.load_navigation_screen)
+
+    def request_failure(self, request, failure):
+        self.ids.error.text = failure["error"]["message"]
+
+    def load_navigation_screen(self, request, result):
+        # SAVE USER DATA ON THE APP AND LOAD THE NAVIGATION_SCREEN
+        APP.data = result
+
+        if not APP.root.has_screen("navigation_screen"):
+            APP.root.add_widget(NavigationScreen())
+        APP.root.remove_widget(APP.root.get_screen("login_screen"))
+        APP.root.current = "navigation_screen"
+

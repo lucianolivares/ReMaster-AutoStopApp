@@ -4,8 +4,7 @@ from kivymd.app import MDApp
 from kivymd.uix.screen import MDScreen
 
 from login_screen import LoginScreen
-from myfirebase import Login
-from navigation_screen import NavigationScreen
+from myfirebase import exchange_refresh_token
 
 Builder.load_string("""
 <StartupScreen>
@@ -20,7 +19,6 @@ Builder.load_string("""
 """)
 
 APP = MDApp.get_running_app()
-LOGIN = Login()
 
 class StartupScreen(MDScreen):
     """[summary]
@@ -35,16 +33,9 @@ class StartupScreen(MDScreen):
         try:
             # Try to read the persisten signing credentials (refresh token)
             # Use refresh token to get a new idToken
-            LOGIN.exchange_refresh_token()
-            Clock.schedule_once(lambda dt: self.load_navigation_screen(), 2)
+            exchange_refresh_token()
         except:
             Clock.schedule_once(lambda dt: self.load_login_screen(), 2)
-
-    def load_navigation_screen(self):
-        nav_screen = NavigationScreen()
-        APP.root.add_widget(nav_screen)
-        APP.root.current = "navigation_screen"
-        self.remove_screen()
 
     def load_login_screen(self):
         login_screen = LoginScreen()

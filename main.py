@@ -13,6 +13,7 @@ class AutoStop(MDApp):
         #Window.size = (480, 720)
         sm = ScreenManager(transition=NoTransition())
         self.title = "AutoStop"
+        self.WAK = ""
         self.theme_cls.primary_palette = "LightBlue"
         self.theme_cls.primary_hue = "700"
         self.theme_cls.accent_palette = "Teal"

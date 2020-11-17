@@ -5,53 +5,35 @@ from kivymd.app import MDApp
 from kivy.network.urlrequest import UrlRequest
 from navigation_screen import NavigationScreen
 
-WAK = ""
 APP = MDApp.get_running_app()
 
-
-class Login():
-    def __init__(self) -> None:
-        self.login_error = None
-
-    def login(self, email, password):
-        login_url = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=" + WAK
-        login_payload = json.dumps({"email": email, "password": password, "returnSecureToken":True})
-        login_request = UrlRequest(login_url, method="POST", req_body=login_payload, on_success=self.testing, on_failure=self.request_failure)
-
-    def testing(self, request, result):
-        refresh_token = result["refreshToken"]
-        with open("resources/refresh_token.txt", "w") as f:
-            f.write(refresh_token)
+def exchange_refresh_token():
+    with open("resources/refresh_token.txt", 'r') as f:
+        refresh_token = f.read()
         
-        localId = result["localId"]
-        self.refresh_data(localId)
+    refresh_url = "https://securetoken.googleapis.com/v1/token?key=" + APP.WAK
+    refresh_payload = '{"grant_type": "refresh_token", "refresh_token": "%s"}' % refresh_token
+    refresh_req = requests.post(refresh_url, data=refresh_payload)
 
-    def request_failure(self, request, failure):
-        pass
+    localId = refresh_req.json()['user_id']
+    refresh_data(localId)
 
-    def exchange_refresh_token(self):
-        with open("resources/refresh_token.txt", 'r') as f:
-            refresh_token = f.read()
-            
-        refresh_url = "https://securetoken.googleapis.com/v1/token?key=" + WAK
-        refresh_payload = '{"grant_type": "refresh_token", "refresh_token": "%s"}' % refresh_token
-        refresh_req = requests.post(refresh_url, data=refresh_payload)
+def refresh_data(localId):
+    # Pasar requests a UrlResquest 
+    APP.localId = localId
+    data_url = f'https://remasterautostop-fc4ec.firebaseio.com/users/{APP.localId}.json'
+    user_data = UrlRequest(data_url, on_success=load_navigation_screen)
 
-        localId = refresh_req.json()['user_id']
-        self.refresh_data(localId)
+def load_navigation_screen(request, result):
+    # SAVE USER DATA ON THE APP AND LOAD THE NAVIGATION_SCREEN
+    APP.data = result
 
-    def refresh_data(self, localId):
-        # Pasar requests a UrlResquest 
-        user_data = requests.get(f'https://remasterautostop-fc4ec.firebaseio.com/users/{localId}.json')
-        APP.localId = localId
-        APP.data = json.loads(user_data.content.decode())
-        self.load_navigation_screen()
+    if not APP.root.has_screen("navigation_screen"):
+        APP.root.add_widget(NavigationScreen())
+    APP.root.remove_widget(APP.root.get_screen("startup_screen"))
+    APP.root.current = "navigation_screen"
 
-    def load_navigation_screen(self):
-        nav_screen = NavigationScreen()
-        APP.root.add_widget(nav_screen)
-        APP.root.current = "navigation_screen"
-        APP.root.remove_widget(APP.root.get_screen('login_screen'))
+
 
 class Signup():
     @staticmethod
@@ -75,7 +57,7 @@ class Signup():
         return True
 
     def signup(self, email, password, name, last_name, cel_number, rut=None, plate=None, driver=False):
-        signup_url = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=" + WAK
+        signup_url = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=" + APP.WAK
         signup_payload = {
             "email": email,
             "password": password}
@@ -115,12 +97,12 @@ class Signup():
             print(signup_data["error"]["message"])
 
     def delete_account(self, email, password):
-        login_url = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=" + WAK
+        login_url = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=" + APP.WAK
         login_payload = {"email": email, "password": password, "returnSecureToken":True}
         login_request = requests.post(login_url, data=login_payload)
         login_data = json.loads(login_request.content.decode())
 
-        delete_account_url = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/deleteAccount?key=" + WAK
+        delete_account_url = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/deleteAccount?key=" + APP.WAK
         delete_payload = {
             "idToken": login_data["idToken"],
             "localId": login_data["localId"]
