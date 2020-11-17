@@ -1,18 +1,17 @@
 from kivy.clock import Clock
 from kivy.lang import Builder
+from kivy.network.urlrequest import UrlRequest
 from kivymd.app import MDApp
 from kivymd.uix.button import MDFlatButton
 from kivymd.uix.dialog import MDDialog
-from kivymd.uix.label import MDLabel
 from kivymd.uix.screen import MDScreen
-import threading
 from kivy.clock import mainthread
 
 from add_trip_layout import AddTripLayout
 from myfirebase import Database
 from trips_banner import TripsBanner
 from classes import *
-import time
+
 
 Builder.load_string('''
 <TripsAvailableScreen>:
@@ -62,21 +61,17 @@ class TripsAvailableScreen(MDScreen):
     def on_pre_enter(self, *args):
         self.add_trip_button.bind(on_release=self.show_add_trip_dialog)
         # Charge Trips
-        self.ids.trips_grid.add_widget(loading_message())
-        self.start_second_thread()
+        self.trips_available()
 
-    def start_second_thread(self):
-        threading.Thread(target=self.load_data).start()
+    def trips_available(self):
+        url = f'https://remasterautostop-fc4ec.firebaseio.com/trips_available.json'
+        get_request = UrlRequest(url, on_success=self.load_data)
 
-    def load_data(self):
-        trips_data = DATABASE.trips_available("trips_available")
-        self.ids.trips_grid.clear_widgets()
-        self.ids.trips_grid.add_widget(loading_message())
-        time.sleep(.5)
+    def load_data(self, request, result):
+        trips_data = result
         self.ids.trips_grid.clear_widgets()
         self.refresh_available_trips(trips_data)
 
-    @mainthread
     def refresh_available_trips(self, trips_data):
         try :
             for trip, data in trips_data.items():
@@ -92,7 +87,7 @@ class TripsAvailableScreen(MDScreen):
                     seats=f"{data['seats_available']} Disponibles",
                     trip_id=trip,
                     hint_text_seats=self.hint_text_seats,
-                    reload_data=self.start_second_thread
+                    reload_data=self.trips_available
                 ))
         except :
             temp = no_trips_message()
@@ -104,7 +99,7 @@ class TripsAvailableScreen(MDScreen):
         def refresh_callback(interval):
             self.ids.refresh_layout.refresh_done()
 
-        self.start_second_thread()
+        self.trips_available()
         Clock.schedule_once(refresh_callback, 1.5)
 
     def show_add_trip_dialog(self, instance_button):
@@ -155,7 +150,7 @@ class TripsAvailableScreen(MDScreen):
             )
 
             self.close_dialog("")
-            self.start_second_thread()
+            self.trips_available()
 
         else:
             print("Debes Completar Todos Los Datos")

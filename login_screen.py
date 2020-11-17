@@ -1,11 +1,10 @@
 from kivy.lang import Builder
-from kivy.clock import Clock
+from kivy.clock import Clock, mainthread
 from kivymd.app import MDApp
 from kivymd.uix.screen import MDScreen
 from kivy.network.urlrequest import UrlRequest
 import json
 from navigation_screen import NavigationScreen
-import requests
 
 
 Builder.load_string('''
