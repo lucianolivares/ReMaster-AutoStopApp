@@ -1,11 +1,9 @@
 from kivy.clock import Clock
 from kivy.lang import Builder
-from kivy.network.urlrequest import UrlRequest
 from kivymd.app import MDApp
 from kivymd.uix.button import MDFlatButton
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.screen import MDScreen
-from kivy.clock import mainthread
 
 from add_trip_layout import AddTripLayout
 from myfirebase import Database
@@ -61,14 +59,10 @@ class TripsAvailableScreen(MDScreen):
     def on_pre_enter(self, *args):
         self.add_trip_button.bind(on_release=self.show_add_trip_dialog)
         # Charge Trips
-        self.trips_available()
+        self.load_data()
 
-    def trips_available(self):
-        url = f'https://remasterautostop-fc4ec.firebaseio.com/trips_available.json'
-        get_request = UrlRequest(url, verify=False, on_success=self.load_data)
-
-    def load_data(self, request, result):
-        trips_data = result
+    def load_data(self):
+        trips_data = DATABASE.trips_available("trips_available")
         self.ids.trips_grid.clear_widgets()
         self.refresh_available_trips(trips_data)
 
@@ -87,7 +81,7 @@ class TripsAvailableScreen(MDScreen):
                     seats=f"{data['seats_available']} Disponibles",
                     trip_id=trip,
                     hint_text_seats=self.hint_text_seats,
-                    reload_data=self.trips_available
+                    reload_data=self.load_data
                 ))
         except :
             temp = no_trips_message()
@@ -99,7 +93,7 @@ class TripsAvailableScreen(MDScreen):
         def refresh_callback(interval):
             self.ids.refresh_layout.refresh_done()
 
-        self.trips_available()
+        self.load_data()
         Clock.schedule_once(refresh_callback, 1.5)
 
     def show_add_trip_dialog(self, instance_button):
@@ -150,7 +144,7 @@ class TripsAvailableScreen(MDScreen):
             )
 
             self.close_dialog("")
-            self.trips_available()
+            self.load_data()
 
         else:
             print("Debes Completar Todos Los Datos")

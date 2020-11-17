@@ -61,14 +61,10 @@ class PassengersAvailableScreen(MDScreen):
     def on_pre_enter(self, *args):
         self.add_request_button.bind(on_release=self.show_add_request_dialog)
         # Charge Passengers Data
-        self.trips_available()
+        self.load_data()
 
-    def trips_available(self):
-        url = f'https://remasterautostop-fc4ec.firebaseio.com/passengers_request.json'
-        get_request = UrlRequest(url, verify=False, on_success=self.load_data)
-
-    def load_data(self, request, result):
-        trips_data = result
+    def load_data(self):
+        trips_data = DATABASE.trips_available("passengers_request")
         self.ids.passengers_grid.clear_widgets()
         self.refresh_available_passengers(trips_data)
 
@@ -86,7 +82,7 @@ class PassengersAvailableScreen(MDScreen):
                     seats=f"{data['n_passengers']} Pasajeros",
                     trip_id=passenger,
                     hint_text_seats=self.hint_text_seats,
-                    reload_data=self.trips_available
+                    reload_data=self.load_data
                 ))
         except Exception as e:
             temp = no_trips_message()
@@ -99,7 +95,7 @@ class PassengersAvailableScreen(MDScreen):
         def refresh_callback(interval):
             self.ids.refresh_layout.refresh_done()
 
-        self.trips_available()
+        self.load_data()
         Clock.schedule_once(refresh_callback, 1.5)
 
     def show_add_request_dialog(self, instance_button):
@@ -148,7 +144,7 @@ class PassengersAvailableScreen(MDScreen):
                 self.n_passengers, APP.data['cel_number']
             )
             self.close_dialog("")
-            self.trips_available()
+            self.load_data()
         else:
             print("Debes Completar Todos Los Datos")
 
