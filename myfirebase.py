@@ -226,6 +226,3 @@ class Database():
         get_request = requests.get(f'https://remasterautostop-fc4ec.firebaseio.com/{type_request}.json')
         trips_data = json.loads(get_request.content.decode())
         return trips_data
-
-
-#MyFirebase().sign_in("luciano@correo.com", "12341234")

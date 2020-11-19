@@ -130,7 +130,7 @@ class TripsBanner(RelativeLayout):
         if plate == "":
             self.remove_widget(self.ids.plate)
         
-        if not "driver" in APP.data or APP.data["cel_number"] != kw["cel_number"]:
+        if APP.data["cel_number"] != kw["cel_number"]:
             self.remove_widget(self.ids.delete_button)
             self.remove_widget(self.ids.edit_button)
             self.remove_widget(self.ids.complete_button)
