@@ -4,6 +4,7 @@ from kivymd.app import MDApp
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.button import MDFlatButton
+import time
 
 from myfirebase import Signup, exchange_refresh_token
 
@@ -115,8 +116,7 @@ class SettingsScreen(MDScreen):
             # If All fields are completed
             self.close_dialog("")
             SIGNUP.signup_driver(APP.localId, driver_data)
-            exchange_refresh_token()
-            self.refresh_driver_data()
+            self.log_out("")
         else:
             print("Debes Completar Todos Los Datos")
 

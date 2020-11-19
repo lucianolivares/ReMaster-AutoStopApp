@@ -30,7 +30,8 @@ def load_navigation_screen(request, result):
 
     if not APP.root.has_screen("navigation_screen"):
         APP.root.add_widget(NavigationScreen())
-    APP.root.remove_widget(APP.root.get_screen("startup_screen"))
+    if APP.root.has_screen("startup_screen"):
+        APP.root.remove_widget(APP.root.get_screen("startup_screen"))
     APP.root.current = "navigation_screen"
 
 

@@ -59,6 +59,8 @@ class TripsAvailableScreen(MDScreen):
         self.n_passenger = int
         
     def on_pre_enter(self, *args):
+        if not "driver" in APP.data:
+            self.add_trip_button.disabled = True
         self.add_trip_button.bind(on_release=self.show_add_trip_dialog)
         # Charge Trips
         self.trips_available()
