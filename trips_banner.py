@@ -16,7 +16,6 @@ Builder.load_string("""
             rgba: 0, .5, .8, 0.2
         RoundedRectangle:
             radius: (40, 40)
-            pos: self.pos
             size: self.size
     
     MDLabel:
